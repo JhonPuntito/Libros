@@ -112,21 +112,24 @@ document.getElementById('clear').addEventListener('click',()=>{if(confirm('¿Bor
 document.getElementById('btnSearch').addEventListener('click',()=>{const q=document.getElementById('search').value.trim().toLowerCase();render(q);});
 document.getElementById('btnReset').addEventListener('click',()=>{document.getElementById('search').value='';render();});
 
-// Guardar en GitHub (dispara workflow)
-document.getElementById('saveGithub').addEventListener('click',async()=>{
-  const payload={event_type:"update-books",client_payload:{content:JSON.stringify(books)}};
-  try{
-    const res=await fetch("https://api.github.com/repos/JhonPuntito/Libros/dispatches",{
-      method:"POST",
-      headers:{
-        "Accept":"application/vnd.github+json",
-        "Authorization":"Bearer GH_TOKEN_AQUI" // este se sustituye en el workflow con tu secreto
-      },
-      body:JSON.stringify(payload)
+// Guardar en GitHub vía Render
+document.getElementById('saveGithub').addEventListener('click', async () => {
+  const payload = { books };
+  try {
+    const res = await fetch("https://libros-backend.onrender.com/update-books", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
     });
-    if(res.ok) alert("Se envió la solicitud al workflow. Revisa la pestaña Actions en tu repo.");
-    else alert("Error al enviar a GitHub: "+res.status);
-  }catch(e){alert("Error: "+e.message);}
+    const data = await res.json();
+    if (res.ok) {
+      alert("OK ✅: " + (data.message || "Workflow disparado"));
+    } else {
+      alert("Error en servidor: " + JSON.stringify(data));
+    }
+  } catch (e) {
+    alert("Error de red: " + e.message);
+  }
 });
 
 // Cargar inicial
