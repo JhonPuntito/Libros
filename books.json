@@ -5,5 +5,12 @@
     "autor": "James Stewart",
     "disponible": true,
     "notas": "Ejemplar subido por el usuario (PDF)."
+  },
+  {
+    "id": 1759270600310,
+    "titulo": "Estadistica y Muestreo",
+    "autor": "Ciro Martinez",
+    "disponible": true,
+    "notas": ""
   }
 ]
