@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Catálogo de libros</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;margin:0;background:#0f1724;color:#e6eef8}
+    header{background:#081028;padding:18px 24px;box-shadow:0 3px 12px rgba(0,0,0,.6)}
+    h1{margin:0;font-size:20px}
+    .container{max-width:900px;margin:24px auto;padding:0 16px}
+    .search{display:flex;gap:8px;margin-bottom:12px}
+    input[type="search"]{flex:1;padding:10px;border-radius:8px;border:1px solid #233244;background:#071833;color:#fff}
+    button{padding:10px 14px;border-radius:8px;border:none;background:#1e90ff;color:#fff;cursor:pointer}
+    .book{background:#081923;padding:12px;border-radius:8px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+    .meta{max-width:75%}
+    .title{font-weight:700}
+    .author{opacity:.8;font-size:13px}
+    .status{font-weight:700;padding:6px 10px;border-radius:6px}
+    .available{background:#0b7a3f;color:#eafff0}
+    .loaned{background:#7a1020;color:#fff2f2}
+    footer{margin-top:24px;color:#9fb2cc;font-size:14px}
+    .hint{opacity:.7;font-size:13px}
+    .controls{display:flex;gap:8px;align-items:center}
+    a.admin{color:#ffd966;text-decoration:none;border:1px solid rgba(255,217,102,.08);padding:6px 8px;border-radius:6px}
+    .empty{padding:24px;border-radius:8px;background:#071a25;text-align:center;opacity:.9}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Catálogo de libros</h1>
+  </header>
+
+  <main class="container">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px">
+      <div>
+        <div class="hint">Busca por título o autor</div>
+      </div>
+      <div class="controls">
+        <a class="admin" href="admin.html" target="_blank">Panel admin</a>
+      </div>
+    </div>
+
+    <div class="search">
+      <input id="q" type="search" placeholder="Escribe título o autor..." />
+      <button id="btnSearch">Buscar</button>
+      <button id="btnAll" title="Mostrar todos">Todos</button>
+    </div>
+
+    <div id="results"></div>
+
+    <footer>
+      <div>Datos leídos desde <code>books.json</code> en este repositorio.</div>
+      <div style="margin-top:6px" class="hint">Los cambios ahora pueden guardarse automáticamente en GitHub desde el panel admin.</div>
+    </footer>
+  </main>
+
+<script>
+async function loadBooks(){
+  try{
+    const r = await fetch('books.json', {cache: "no-store"});
+    if(!r.ok) throw new Error('No se pudo cargar books.json');
+    const data = await r.json();
+    return data;
+  }catch(e){
+    console.error(e);
+    return [];
+  }
+}
+
+function renderBooks(books, container){
+  container.innerHTML = '';
+  if(!books.length){
+    container.innerHTML = '<div class="empty">No se encontraron libros.</div>';
+    return;
+  }
+  for(const b of books){
+    const div = document.createElement('div'); div.className = 'book';
+    const meta = document.createElement('div'); meta.className = 'meta';
+    meta.innerHTML = `<div class="title">${escapeHtml(b.titulo)}</div>
+                      <div class="author">${escapeHtml(b.autor || '')} ${b.notas?` · <span style="opacity:.7">${escapeHtml(b.notas)}</span>`:''}</div>`;
+    const status = document.createElement('div');
+    status.className = 'status ' + (b.disponible ? 'available' : 'loaned');
+    status.textContent = b.disponible ? 'Disponible' : 'Prestado';
+    div.appendChild(meta);
+    div.appendChild(status);
+    container.appendChild(div);
+  }
+}
+
+function escapeHtml(s){
+  if(!s) return '';
+  return s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
+}
+
+document.getElementById('btnSearch').addEventListener('click', async ()=>{
+  const q = document.getElementById('q').value.trim().toLowerCase();
+  const books = await loadBooks();
+  const res = books.filter(b => (b.titulo||'').toLowerCase().includes(q) || (b.autor||'').toLowerCase().includes(q));
+  renderBooks(res, document.getElementById('results'));
+});
+
+document.getElementById('btnAll').addEventListener('click', async ()=>{
+  const books = await loadBooks();
+  renderBooks(books, document.getElementById('results'));
+});
+
+loadBooks().then(books => renderBooks(books, document.getElementById('results')));
+</script>
+</body>
+</html>
