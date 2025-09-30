@@ -116,15 +116,15 @@ document.getElementById('btnReset').addEventListener('click',()=>{document.getEl
 document.getElementById('saveGithub').addEventListener('click',async()=>{
   const payload={event_type:"update-books",client_payload:{content:JSON.stringify(books)}};
   try{
-    const res=await fetch("https://api.github.com/repos/USUARIO/REPO/dispatches",{
+    const res=await fetch("https://api.github.com/repos/JhonPuntito/Libros/dispatches",{
       method:"POST",
       headers:{
         "Accept":"application/vnd.github+json",
-        "Authorization":"Bearer GH_TOKEN_AQUI" // reemplazar en Actions
+        "Authorization":"Bearer GH_TOKEN_AQUI" // este se sustituye en el workflow con tu secreto
       },
       body:JSON.stringify(payload)
     });
-    if(res.ok) alert("Se envió la solicitud al workflow. Revisa Actions en tu repo.");
+    if(res.ok) alert("Se envió la solicitud al workflow. Revisa la pestaña Actions en tu repo.");
     else alert("Error al enviar a GitHub: "+res.status);
   }catch(e){alert("Error: "+e.message);}
 });
